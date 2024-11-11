@@ -121,70 +121,109 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Error: ${error.message}`);
         }
     }
-
-    function drawTimer(x, y, radius, time, label, isActive) {
-        const minutes = Math.floor(time / 60);
-        const seconds = time % 60;
-        const progress = isActive ? 1 - (time / (isFocusTime ? focusTime : breakTime)) : 0;
-    
-        // Create a radial gradient for a multi-layered glow effect
-        const gradient = ctx.createRadialGradient(x, y, radius - 50, x, y, radius);
-        gradient.addColorStop(0, isFocusTime ? 'rgba(58, 29, 109, 0.5)' : 'rgba(58, 29, 109, 0.3)');
-        gradient.addColorStop(0.5, isFocusTime ? 'rgba(120, 36, 199, 0.6)' : 'rgba(255, 255, 255, 0.4)');
-        gradient.addColorStop(1, isFocusTime ? 'rgba(246, 49, 83, 1)' : 'rgba(255, 255, 255, 1)');
-    
-        ctx.save();
-        if (isActive && isPlaying) {
-            ctx.shadowColor = isFocusTime ? '#f63153' : '#ffffff';
-            ctx.shadowBlur = 80; // More intense shadow blur for a brighter glow
-            ctx.fillStyle = gradient;
-        }
-    
-        // Draw the circle outline with a multi-layered gradient
-        ctx.beginPath();
-        ctx.arc(x, y, radius, 0, Math.PI * 2);
-        ctx.strokeStyle = gradient;
-        ctx.lineWidth = 10; // Thicker line for better visual impact
-        ctx.stroke();
-        ctx.restore();
-    
-        // Draw stars and particles for a cosmic effect
-        if (isActive && isPlaying) {
-            for (let i = 0; i < 50; i++) {
-                const starX = x + (Math.random() - 0.5) * radius * 2;
-                const starY = y + (Math.random() - 0.5) * radius * 2;
-                const starRadius = Math.random() * 2;
-    
-                ctx.beginPath();
-                ctx.arc(starX, starY, starRadius, 0, Math.PI * 2);
-                ctx.fillStyle = `rgba(255, 255, 255, ${Math.random()})`;
-                ctx.fill();
-            }
-        }
-    
-        // Draw the progress arc
-        ctx.beginPath();
-        ctx.arc(x, y, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * progress));
-        ctx.strokeStyle = isFocusTime ? '#f63153' : '#ffffff';
-        ctx.lineWidth = 8;
-        ctx.stroke();
-    
-        // Draw the time display
-        ctx.fillStyle = isActive && isPlaying && isFocusTime ? '#f63153' : '#ffffff';
-        ctx.font = 'bold 72px Arial';
-        ctx.textAlign = 'center';
-        ctx.fillText(
-            `${String(minutes).padStart(2, '0')} ${String(seconds).padStart(2, '0')}`,
-            x,
-            y + 20
-        );
-    
-        // Draw the labels
-        ctx.font = '20px Arial';
-        ctx.fillText('MINS', x - 40, y + 60);
-        ctx.fillText('SECS', x + 40, y + 60);
-        ctx.fillText(label, x, y - 60);
+// Particle class to handle individual particle properties and movement
+class Particle {
+    constructor(x, y, angle, distance, maxRadius) {
+        this.x = x;
+        this.y = y;
+        this.angle = angle;
+        this.distance = distance;
+        this.maxRadius = maxRadius;
+        this.radius = Math.random() * 2;
+        this.opacity = Math.random();
+        this.speed = 0.01 + Math.random() * 0.02; // Control the speed of particle movement
     }
+
+    update() {
+        // Update the angle to create movement
+        this.angle += this.speed;
+        // Calculate new positions based on the angle and distance
+        this.x = canvas.width / 2 + Math.cos(this.angle) * this.distance;
+        this.y = canvas.height / 2 + Math.sin(this.angle) * this.distance;
+        this.opacity = 0.5 + 0.5 * Math.sin(this.angle); // Create a flickering effect
+    }
+
+    draw(ctx) {
+        ctx.beginPath();
+        ctx.arc(this.x, this.y, this.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(255, 255, 255, ${this.opacity})`;
+        ctx.fill();
+    }
+}
+
+// Array to hold particles
+let particles = [];
+for (let i = 0; i < 50; i++) {
+    const angle = Math.random() * Math.PI * 2;
+    const distance = 160 + Math.random() * 20; // Position particles just outside the circle
+    particles.push(new Particle(canvas.width / 2, canvas.height / 2, angle, distance, 2));
+}
+
+function drawTimer(x, y, radius, time, label, isActive) {
+    const minutes = Math.floor(time / 60);
+    const seconds = time % 60;
+    const progress = isActive ? 1 - (time / (isFocusTime ? focusTime : breakTime)) : 0;
+
+    // Create a radial gradient for a fancier glow effect
+    const gradient = ctx.createRadialGradient(x, y, radius - 50, x, y, radius);
+    gradient.addColorStop(0, isFocusTime ? 'rgba(58, 29, 109, 0.5)' : 'rgba(58, 29, 109, 0.3)');
+    gradient.addColorStop(0.5, isFocusTime ? 'rgba(120, 36, 199, 0.6)' : 'rgba(255, 255, 255, 0.4)');
+    gradient.addColorStop(1, isFocusTime ? 'rgba(246, 49, 83, 1)' : 'rgba(255, 255, 255, 1)');
+
+    ctx.save();
+    if (isActive && isPlaying) {
+        ctx.shadowColor = isFocusTime ? '#f63153' : '#ffffff';
+        ctx.shadowBlur = 80; // Intense shadow for a strong glow
+        ctx.fillStyle = gradient;
+    }
+
+    // Draw the circle outline with a multi-layered gradient
+    ctx.beginPath();
+    ctx.arc(x, y, radius, 0, Math.PI * 2);
+    ctx.strokeStyle = gradient;
+    ctx.lineWidth = 10; // Thicker line for better visual impact
+    ctx.stroke();
+    ctx.restore();
+
+    // Draw the progress arc
+    ctx.beginPath();
+    ctx.arc(x, y, radius, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * progress));
+    ctx.strokeStyle = isFocusTime ? '#f63153' : '#ffffff';
+    ctx.lineWidth = 8;
+    ctx.stroke();
+
+    // Draw the time display
+    ctx.fillStyle = isActive && isPlaying && isFocusTime ? '#f63153' : '#ffffff';
+    ctx.font = 'bold 72px Arial';
+    ctx.textAlign = 'center';
+    ctx.fillText(
+        `${String(minutes).padStart(2, '0')} ${String(seconds).padStart(2, '0')}`,
+        x,
+        y + 20
+    );
+
+    ctx.font = '20px Arial';
+    ctx.fillText('MINS', x - 40, y + 60);
+    ctx.fillText('SECS', x + 40, y + 60);
+    ctx.fillText(label, x, y - 60);
+
+    // Draw particles
+    particles.forEach(particle => {
+        particle.update();
+        particle.draw(ctx);
+    });
+}
+
+// Animation loop to redraw the timer and particles
+function animate() {
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    draw();
+    requestAnimationFrame(animate);
+}
+
+// Call animate to start the loop
+animate();
+
     
     
 
