@@ -1,0 +1,48 @@
+body {
+    background: #101010;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    min-height: 100vh;
+    margin: 0;
+    font-family: Arial, sans-serif;
+}
+#timerContainer {
+    position: relative;
+}
+#playButton {
+    position: absolute;
+    top: 10px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 10px;
+}
+#playButton svg {
+    width: 24px;
+    height: 24px;
+    fill: #fff;
+}
+
+
+#timerContainer {
+    position: relative;
+}
+
+#centerButton {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: none;
+    border: none;
+    cursor: pointer;
+}
+
+#centerButton svg {
+    width: 45px;
+    height: 45px;
+    fill: none;
+}
