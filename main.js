@@ -1,11 +1,14 @@
-const { app, BrowserWindow, ipcMain  } = require('electron');
+const { app, BrowserWindow, ipcMain, Tray, Menu } = require('electron');
 const path = require('path');
 const packageJson = require('./package.json'); // Load package.json
+
+let mainWindow;
+let tray = null;
 
 function createWindow() {
     app.setAppUserModelId('io.lcrt.justpomodoro'); // Set a custom appId
 
-    const mainWindow = new BrowserWindow({
+    mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
         icon: path.join(__dirname, 'public', 'icon.png'), // Path to your icon file
@@ -26,8 +29,40 @@ function createWindow() {
     ipcMain.handle('get-app-version', () => {
         return packageJson.version;
     });
+
+
+    ipcMain.handle('toggleTray', (event, isTrayEnabled) => {
+        if (isTrayEnabled) {
+            if (!tray) {
+                tray = new Tray('public/icon.png');
+                tray.setContextMenu(Menu.buildFromTemplate([
+                    { label: 'Show App', click: () => mainWindow.show() },
+                    { label: 'Quit', click: () => app.quit() }
+                ]));
+                tray.setToolTip('Just Pomodoro');
+            }
+            mainWindow.hide();
+        } else {
+            if (tray) {
+                tray.destroy();
+                tray = null;
+            }
+            mainWindow.show();
+        }
+    });
+    
+    ipcMain.handle('toggleStartup', (event, isStartupEnabled) => {
+        app.setLoginItemSettings({
+            openAtLogin: isStartupEnabled
+        });
+    });
+    
+    ipcMain.handle('setAlwaysOnTop', (event, isAlwaysOnTop) => {
+        mainWindow.setAlwaysOnTop(isAlwaysOnTop);
+    });
+
     // Open DevTools (Optional for development)
-    // mainWindow.webContents.openDevTools();
+    //mainWindow.webContents.openDevTools();
 }
 
 app.whenReady().then(createWindow);

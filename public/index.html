@@ -6,6 +6,7 @@
     <meta http-equiv="Content-Security-Policy" content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline';">
     <title>Just Pomodoro  <span id="appVersion"></span></title>
     <link rel="stylesheet" href="styles.css">
+    <link href="./tailwind.min.css" rel="stylesheet">
 </head>
 <body>
     <div id="timerContainer">
@@ -21,7 +22,7 @@
         <canvas id="timerCanvas" width="1200" height="600"></canvas>
         
         <!-- Center SVG Button -->
-        <button id="centerButton" class="svg-button">
+        <button id="settingsButton" class="svg-button">
             <svg version="1.0" xmlns="http://www.w3.org/2000/svg"
                  width="100" height="100" viewBox="0 0 512.000000 512.000000"
                  preserveAspectRatio="xMidYMid meet">
@@ -36,8 +37,69 @@
         <audio id="notificationSoundFocus" src="../src/start-focus.mp3" preload="auto"></audio>
         <audio id="notificationSoundBreak" src="../src/start-break.mp3" preload="auto"></audio>
     </div>
+
+    <div id="settingsModal" class="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center hidden">
+        <div class="bg-gray-900 bg-opacity-90 backdrop-blur-md rounded-lg p-6 w-1/3 shadow-2xl">
+            <h2 class="text-3xl font-bold mb-4 text-white">Settings</h2>
+            
+            <!-- Section 1: Timer Control -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-2 text-gray-200">Timer Control</h3>
+                <label class="block mb-3">
+                    <span class="text-sm font-medium text-gray-300">Focus Time (minutes)</span>
+                    <input type="number" id="focusTimeInput" min="1" max="120" class="w-full border border-gray-600 bg-gray-800 text-gray-100 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-fuchsia-500" placeholder="Enter focus time" />
+                </label>
+                <label class="block mb-3">
+                    <span class="text-sm font-medium text-gray-300">Break Time (minutes)</span>
+                    <input type="number" id="breakTimeInput" min="1" max="120" class="w-full border border-gray-600 bg-gray-800 text-gray-100 p-2 rounded mt-1 focus:outline-none focus:ring-2 focus:ring-fuchsia-500" placeholder="Enter break time" />
+                </label>
+                <button id="resetTimerBtn" class="bg-fuchsia-600 hover:bg-fuchsia-700 text-white py-2 px-4 rounded mt-2 transition duration-300">Reset Timer</button>
+            </div>
+    
+            <!-- Section 2: Sound Control -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-2 text-gray-200">Sound Options</h3>
+                <label class="flex items-center">
+                    <input type="checkbox" id="soundToggle" checked class="mr-2 h-5 w-5 text-fuchsia-500 border-gray-600 bg-gray-800 rounded focus:ring-fuchsia-500">
+                    <span class="text-gray-300">Enable Sound</span>
+                </label>
+            </div>
+    
+            <!-- Section 3: System Notification Control -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-2 text-gray-200">System Notification</h3>
+                <label class="flex items-center">
+                    <input type="checkbox" id="systemNotificationToggle" class="mr-2 h-5 w-5 text-fuchsia-500 border-gray-600 bg-gray-800 rounded focus:ring-fuchsia-500">
+                    <span class="text-gray-300">Enable System Notification</span>
+                </label>
+            </div>
+    
+            <!-- Section 4: Window Options -->
+            <div class="mb-6">
+                <h3 class="font-semibold text-lg mb-2 text-gray-200">Window Options</h3>
+                <label class="flex items-center mb-2">
+                    <input type="checkbox" id="trayToggle" class="mr-2 h-5 w-5 text-fuchsia-500 border-gray-600 bg-gray-800 rounded focus:ring-fuchsia-500">
+                    <span class="text-gray-300">Move app icon from Taskbar to System Tray</span>
+                </label>
+                <label class="flex items-center mb-2">
+                    <input type="checkbox" id="startupToggle" class="mr-2 h-5 w-5 text-fuchsia-500 border-gray-600 bg-gray-800 rounded focus:ring-fuchsia-500">
+                    <span class="text-gray-300">Launch at Startup</span>
+                </label>
+                <label class="flex items-center">
+                    <input type="checkbox" id="alwaysOnTopToggle" class="mr-2 h-5 w-5 text-fuchsia-500 border-gray-600 bg-gray-800 rounded focus:ring-fuchsia-500">
+                    <span class="text-gray-300">Keep this window always on top</span>
+                </label>
+            </div>
+    
+            <!-- Close Button -->
+            <button id="closeModalBtn" class="mt-4 bg-gray-700 hover:bg-gray-600 text-white py-2 px-4 rounded transition duration-300">Close</button>
+        </div>
+    </div>
+    
+    
     <script src="./renderer.js"></script>
     <script src="./version-script.js"></script>
-    </script>
+    
+
 </body>
 </html>

@@ -31,7 +31,7 @@ body {
     position: relative;
 }
 
-#centerButton {
+#settingsButton {
     position: absolute;
     top: 50%;
     left: 50%;
@@ -41,7 +41,7 @@ body {
     cursor: pointer;
 }
 
-#centerButton svg {
+#settingsButton svg {
     width: 45px;
     height: 45px;
     fill: none;
