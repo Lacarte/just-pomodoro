@@ -19,6 +19,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const trayToggle = document.getElementById('trayToggle');
     const startupToggle = document.getElementById('startupToggle');
     const alwaysOnTopToggle = document.getElementById('alwaysOnTopToggle');
+    const focusOnSwitchToggle = document.getElementById('focusOnSwitchToggle');
 
 
     let isPlaying = false;
@@ -28,6 +29,31 @@ document.addEventListener('DOMContentLoaded', () => {
     let currentTime = 0;
     let isSoundEnabled = true;
     let isSystemNotificationToggle = false;
+    let focusOnSwitch = true; // Variable to track if the app should focus on timer switch
+
+    // New variables for tracking
+    let totalFocusSeconds = 0;
+    let breakCount = 0;
+
+    // Method to handle the timer switch and focus the app if needed
+    function handleTimerSwitch() {
+        if (focusOnSwitch) {
+            window.electronAPI.focusApp();
+        }
+    }
+
+
+
+    // Function to format time display
+    function formatTimeDisplay(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        if (minutes >= 60) {
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            return `${hours}:${String(remainingMinutes).padStart(2, '0')}HR`;
+        }
+        return `${minutes}MN`;
+    }
 
     // Array of motivational quotes
     const motivationalQuotes = [
@@ -109,7 +135,7 @@ document.addEventListener('DOMContentLoaded', () => {
         if (isSystemNotificationToggle) {
             new Notification(title, {
                 body: bodyMessage,
-                icon: "icon-green.png" // Custom icon if needed
+                icon: "resources/iamges/icon-green.png" // Custom icon if needed
             });
         }
 
@@ -122,7 +148,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     async function loadConfiguration() {
         try {
-            const response = await fetch('./config.json');
+            const response = await fetch('./resources/config/config.json');
             if (!response.ok) {
                 throw new Error("Failed to load configuration file.");
             }
@@ -151,10 +177,6 @@ document.addEventListener('DOMContentLoaded', () => {
             alert(`Error: ${error.message}`);
         }
     }
-
-
-
-
 
 
 
@@ -201,9 +223,9 @@ document.addEventListener('DOMContentLoaded', () => {
 
         // Draw the progress arc indicator
         ctx.beginPath();
-        ctx.arc(x, y, radius + 5, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * progress)); // Slightly outside the main circle
+        ctx.arc(x, y, radius + 7, -Math.PI / 2, (-Math.PI / 2) + (Math.PI * 2 * progress)); // Slightly outside the main circle
         ctx.strokeStyle = indicatorColor; // Progress arc color based on mode
-        ctx.lineWidth = 4; // Thinner arc for minimalistic design
+        ctx.lineWidth = 3; // Thinner arc for minimalistic design
         ctx.stroke();
 
         // Draw the time display
@@ -223,7 +245,18 @@ document.addEventListener('DOMContentLoaded', () => {
         ctx.fillText(label, x, y - 50);
     }
 
+    // Function to format time display
+    function formatTimeDisplay(seconds) {
+        const minutes = Math.floor(seconds / 60);
+        if (minutes >= 60) {
+            const hours = Math.floor(minutes / 60);
+            const remainingMinutes = minutes % 60;
+            return `${hours}:${String(remainingMinutes).padStart(2, '0')}HR`;
+        }
+        return `${minutes}MN`;
+    }
 
+    // Update the draw function to include the tracker display
     function draw() {
         ctx.clearRect(0, 0, canvas.width, canvas.height);
 
@@ -232,14 +265,33 @@ document.addEventListener('DOMContentLoaded', () => {
 
         drawTimer(centerX1, canvas.height / 2, 150, isFocusTime ? currentTime : focusTime, 'FOCUS', isFocusTime);
         drawTimer(centerX2, canvas.height / 2, 150, !isFocusTime ? currentTime : breakTime, 'BREAK', !isFocusTime);
+
+        // Draw tracker text
+        const trackerText = `${formatTimeDisplay(totalFocusSeconds)} ${breakCount}BRK`;
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.5)'; // Adjust the 0.5 to control opacity (0.0 to 1.0)
+        ctx.font = '14px Arial';
+        ctx.textAlign = 'center';
+        ctx.fillText(trackerText, canvas.width / 2, canvas.height - 200); // Position below center button
     }
 
     function updateTimer() {
         if (isPlaying && currentTime > 0) {
             currentTime--;
+            if (isFocusTime) {
+                totalFocusSeconds++; // Increment total focus time during active focus sessions
+            }
             if (currentTime === 0) {
+
+
+                if (isFocusTime) {
+                    breakCount++; // Increment break count when switching to break mode
+                }
+                
                 isFocusTime = !isFocusTime;
                 currentTime = isFocusTime ? focusTime : breakTime;
+
+                handleTimerSwitch(); // Call the method when the timer switches
+
 
                 showNotification(isFocusTime ? "Focus time started!" : "Break time started!");
 
@@ -250,12 +302,37 @@ document.addEventListener('DOMContentLoaded', () => {
                         notificationSoundBreak.play();
                     }
                 }
-
             }
         }
         draw();
         setTimeout(updateTimer, 1000);
     }
+
+    // Update reset timer logic to clear tracking data
+    resetTimerBtn.addEventListener('click', () => {
+        currentTime = focusTime;
+        totalFocusSeconds = 0; // Reset total focus time
+        breakCount = 0; // Reset break count
+
+        const newFocusTime = parseInt(focusTimeInput.value);
+        const newBreakTime = parseInt(breakTimeInput.value);
+
+        if (newFocusTime > 0) {
+            focusTime = newFocusTime * 60;
+        }
+
+        if (newBreakTime > 0) {
+            breakTime = newBreakTime * 60;
+        }
+
+        if (isPlaying) {
+            isPlaying = false;
+            playIcon.style.display = 'block';
+            pauseIcon.style.display = 'none';
+        }
+
+        draw();
+    });
 
 
     playButton.addEventListener('click', () => {
@@ -280,33 +357,6 @@ document.addEventListener('DOMContentLoaded', () => {
     // Close the modal
     closeModalBtn.addEventListener('click', () => {
         settingsModal.classList.add('hidden');
-    });
-
-    // Reset Timer Logic
-    resetTimerBtn.addEventListener('click', () => {
-        // Reset the timer to the initial focus time
-        currentTime = focusTime;
-
-        const newFocusTime = parseInt(focusTimeInput.value);
-        const newBreakTime = parseInt(breakTimeInput.value);
-
-        if (newFocusTime > 0) {
-            focusTime = newFocusTime * 60; // Convert to seconds
-        }
-
-        if (newBreakTime > 0) {
-            breakTime = newBreakTime * 60; // Convert to seconds
-        }
-
-        // Pause the timer if it is currently running
-        if (isPlaying) {
-            isPlaying = false;
-            playIcon.style.display = 'block'; // Show play icon
-            pauseIcon.style.display = 'none'; // Hide pause icon
-        }
-
-        // Redraw the timer to reflect the reset state
-        draw();
     });
 
 
@@ -345,6 +395,10 @@ document.addEventListener('DOMContentLoaded', () => {
         window.electronAPI.setAlwaysOnTop(isAlwaysOnTop);
     });
 
+    // Add event listener for the focusOnSwitchToggle checkbox
+    focusOnSwitchToggle.addEventListener('change', (e) => {
+        focusOnSwitch = e.target.checked;
+    });
 
     loadConfiguration();
 });

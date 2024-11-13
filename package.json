@@ -10,10 +10,32 @@
   },
   "build": {
     "appId": "io.lcrt.justpomodoro",
+    "productName": "Just Pomodoro",
+    "directories": {
+      "output": "dist"
+    },
     "win": {
-      "target": "nsis",
-      "icon": "public/icon.ico"
-    }
+      "asar": true,
+      "target": [
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ],
+      "icon": "assets/icon.ico"
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": true,
+      "allowToChangeInstallationDirectory": true,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": true,
+      "shortcutName": "Just Pomodoro",
+      "artifactName": "${productName}-Setup-${version}.exe"
+    },
+    "compression": "maximum"
   },
   "devDependencies": {
     "electron": "^33.2.0",

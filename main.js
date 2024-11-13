@@ -11,7 +11,7 @@ function createWindow() {
     mainWindow = new BrowserWindow({
         width: 1280,
         height: 800,
-        icon: path.join(__dirname, 'public', 'icon.png'), // Path to your icon file
+        icon: path.join(__dirname, 'public','resources','images', 'icon.png'), // Path to your icon file
         webPreferences: {
             contextIsolation: true, // Ensure this is set to true
             enableRemoteModule: false, // Set to false unless needed
@@ -34,7 +34,7 @@ function createWindow() {
     ipcMain.handle('toggleTray', (event, isTrayEnabled) => {
         if (isTrayEnabled) {
             if (!tray) {
-                tray = new Tray('public/icon.png');
+                tray = new Tray('public/resources/images/icon.png');
                 tray.setContextMenu(Menu.buildFromTemplate([
                     { label: 'Show App', click: () => mainWindow.show() },
                     { label: 'Quit', click: () => app.quit() }
@@ -59,6 +59,13 @@ function createWindow() {
     
     ipcMain.handle('setAlwaysOnTop', (event, isAlwaysOnTop) => {
         mainWindow.setAlwaysOnTop(isAlwaysOnTop);
+    });
+
+    // Method to set the window as always on top and focus it
+    ipcMain.handle('focusApp', () => {
+        mainWindow.show(); // Ensure the window is visible
+        mainWindow.setAlwaysOnTop(true); // Optional, keep the window on top
+        mainWindow.focus(); // Bring the window to the foreground
     });
 
     // Open DevTools (Optional for development)

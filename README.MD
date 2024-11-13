@@ -14,8 +14,5 @@ This tool is designed for productivity enthusiasts looking to manage their work 
 
 `npm start`
 
-`electron-packager . --platform-win32 --arch-x64`
-
-
-
-
+<!-- to compile -->
+`npm run build`
