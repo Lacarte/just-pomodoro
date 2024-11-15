@@ -11,7 +11,6 @@ This tool is designed for productivity enthusiasts looking to manage their work 
 
 `npm install`
 
-
 `npm start`
 
 <!-- to compile -->

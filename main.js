@@ -16,7 +16,8 @@ function createWindow() {
             contextIsolation: true, // Ensure this is set to true
             enableRemoteModule: false, // Set to false unless needed
             nodeIntegration: false, // Set to false to avoid security risks
-            preload: path.join(__dirname, 'preload.js') // Use a preload script
+            preload: path.join(__dirname, 'preload.js'), // Use a preload script
+            backgroundThrottling: false // Prevent throttling when minimized
 
         }
     });
@@ -64,7 +65,7 @@ function createWindow() {
     // Method to set the window as always on top and focus it
     ipcMain.handle('focusApp', () => {
         mainWindow.show(); // Ensure the window is visible
-        mainWindow.setAlwaysOnTop(true); // Optional, keep the window on top
+        //mainWindow.setAlwaysOnTop(true); // Optional, keep the window on top
         mainWindow.focus(); // Bring the window to the foreground
     });
 
